@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # author:wtc
-# document: https://github.com/sbzhu/weworkapi_python/tree/master/callback
 """
     Created on 2021/7/9 15:19
 """
