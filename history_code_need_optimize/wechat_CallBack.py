@@ -5,10 +5,10 @@
     Created on 2021/7/9 15:19
 """
 import hashlib
-import ierror
+import history_code_need_optimize.ierror as ierror
 import xml.etree.cElementTree as et
 from flask import Flask,request
-from WXBizMsgCrypt3 import WXBizMsgCrypt
+from history_code_need_optimize.WXBizMsgCrypt3 import WXBizMsgCrypt
 from check_host_information.tcp_port import *
 from ssh_login_template.SSHLogin import *
 # http://tcandyj.top:8888/sms
