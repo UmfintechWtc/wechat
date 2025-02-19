@@ -1,0 +1,15 @@
+qywx:
+  cropid: wwc4cb679fd7911d16
+  application:
+    alarm:
+      port: 8889
+    openapi:
+      port: 8888
+      token: xds6FWhJXxCguC6oqp7EP1XCbI4vel
+      key: DjpDnxxqYqbY3mFDWRP5fVDAgvCIsOJnP4HRRYyDL9S
+
+# 存储企业微信 access_token
+redis:
+  host: localhost
+  port: 6379
+  password: Umfintech_0PS
