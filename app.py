@@ -3,7 +3,7 @@ from ierror import *
 from src.handle.reply_handle import NewReplyMsgWithQYWXHandle
 from src.handle.response_handle import NewResponseToQYWXHandle
 from src.handle.verify_handle import NewVerifyQywxHandle
-from src.alarm.alarm import AlarmClass
+from src.pkg.alarm import AlarmClass
 from src.common.log import XLogger as xlogger
 from src.config.wechat_config import Config
 
@@ -74,7 +74,6 @@ def alarm(config: Config) -> Flask:
         _response = None
         from src.common.utility import Dict2Obj
         body = Dict2Obj(request.json)
-
         if not body.agentid:
             _response = jsonify(ResponseBody(AlarmErrorAgentId))
 
@@ -84,15 +83,8 @@ def alarm(config: Config) -> Flask:
         if not body.receiver:
             _response = jsonify(ResponseBody(AlarmErrorReceiver))
 
-        if not body.receiver.touser and not body.receiver.toparty and not body.receiver.totag:
+        if not body.receiver.touser:
             _response = jsonify(ResponseBody(AlarmErrorToAim))
-        else:
-            if body.receiver.touser and not isinstance(body.receiver.touser, (list, str)):
-                _response = jsonify(ResponseBody(AlarmErrorReceiverType))
-            elif body.receiver.topary and not isinstance(body.receiver.toparty, (list, str)):
-                _response = jsonify(ResponseBody(AlarmErrorReceiverType))
-            elif body.receiver.totag and not isinstance(body.receiver.totag, (list, str)):
-                _response = jsonify(ResponseBody(AlarmErrorReceiverType))
 
         if body.msgtype and body.msgtype not in ["text", "markdown"]:
             _response = jsonify(ResponseBody(AlarmErrorMsgType))

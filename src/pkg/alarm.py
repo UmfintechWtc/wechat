@@ -1,5 +1,5 @@
 from typing import Tuple, Union, Dict, List
-from src.alarm.base import BaseClass
+from src.pkg.base import BaseClass
 from src.client.redis_client import RedisClass
 from ierror import *
 import requests
@@ -20,28 +20,26 @@ class AlarmClass(BaseClass, RedisClass):
         # https://developer.work.weixin.qq.com/document/path/90313
         self.retry_code = [42001, 301002]
 
-    def GetValidAccessToken(self) -> Tuple[int, Union[Exception, str]]:
+    def GetValidAccessToken(self) -> Union[int, str, None]:
         """
-        @return: 有效的access_token
+        @return: access_token
         """
-        ret, at = super().KeySelect(self.redis_access_token_key)
-        if ret != WXSuccess:
-            return ret, at
-        if isinstance(at, bytes):
-            return ret, at.decode("utf8")
-        elif isinstance(at, str):
-            return ret, at
-        elif not at:
+        ret = super().KeySelect(self.redis_access_token_key)
+        if isinstance(ret, int):
+            return ret
+        elif isinstance(ret, bytes):
+            return ret.decode("utf8")
+        elif isinstance(ret, str):
+            return ret
+        elif not ret:
             """
-            在redis中未获取到access_token的key
+            redis 未获取到 access_token
             """
-            ret, at = super().CreateAccessToken()
-            if ret != WXSuccess:
-                return ret, at
-            ret, err = super().KeyCreate(self.redis_access_token_key, at)
-            if ret != WXSuccess:
-                return ret, err
-            return ret, at
+            ret = super().CreateAccessToken()
+            if isinstance(ret, int):
+                return ret
+            return super().KeyCreate(self.redis_access_token_key, ret)         
+            
 
     def SendRequestBody(self, url: str, body: Dict[str, Union[str, int, Dict[str, str]]], timeout: int) -> Dict[str, Union[int, str]]:
         send_response = requests.post(
@@ -78,10 +76,9 @@ class AlarmClass(BaseClass, RedisClass):
                 "content": content
             },
         }
-        ret, at = self.GetValidAccessToken()
-        if ret != WXSuccess:
-            return ret, at
-
+        ret = self.GetValidAccessToken()
+        if ret:
+            return ret
         # 发送消息
         try:
             response = self.SendRequestBody(

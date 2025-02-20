@@ -38,9 +38,6 @@ WXErrorAccessToken: int = 10010
 # Redis设置key失败
 RedisErrorSetKey: int = 10011
 
-# Redis获取key value失败
-RedisErrorGetkey: int = 10012
-
 # Redis获取key ttl失败
 RedisErrorTTLKey: int = 10013
 
@@ -83,11 +80,11 @@ code_description = {
     10008: "解析 postdata 异常",
     10009: "加密企业回复消息异常",
     10010: "获取企业微信应用 AccessToken 异常",
-    10011: "Redis设置 key 异常",
-    10012: "Redis获取 key 的 value 异常",
-    10013: "Redis获取 key 的 ttl 异常",
-    10014: "Redis连接异常",
-    10015: "Redis连接超时",
+    10011: "Redis 设置 key 异常",
+    10012: "Redis 获取 key 的 value 异常",
+    10013: "Redis 获取 key 的 ttl 异常",
+    10014: "Redis 连接异常",
+    10015: "Redis 连接超时",
     10016: "未提供企业微信 agentid",
     10017: "未提供企业微信 secret",
     10018: "未提供企业企业微信接收人",

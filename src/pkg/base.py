@@ -1,5 +1,4 @@
 import requests
-import json
 from typing import Tuple, Union, Dict, List
 import traceback
 from ierror import *
@@ -31,9 +30,9 @@ class BaseClass:
                 self.url,
                 timeout = timeout,
             )
-            return WXSuccess, response.json()["access_token"]
+            return response.json()["access_token"]
         except Exception:
-            return WXErrorAccessToken, traceback.format_exc()
+            return WXErrorAccessToken
 
     def CheckSpecialReceiver(self, receiver: Union[str, List[str]]) -> str:
         """

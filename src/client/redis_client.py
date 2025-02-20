@@ -31,6 +31,7 @@ class RedisClass:
             )
         self.conn = redis.Redis(connection_pool=RedisClass._pool, decode_responses=True)
 
+    @property
     def Ping(self) -> Tuple[int, Union[Exception, bool]]:
         """
         @return: Redis 状态检测结果
@@ -38,25 +39,19 @@ class RedisClass:
         """
         try:
             value = self.conn.ping()
-            return WXSuccess, value
+            return value
         except redis.exceptions.TimeoutError:
-            return RedisErrorConn, traceback.format_exc()
+            return RedisErrorConn
         except redis.exceptions.RedisError:
-            return RedisErrorPing, traceback.format_exc()
+            return RedisErrorPing
 
-    def KeySelect(self, key: str) -> Tuple[int, Any]:
+    def KeySelect(self, key: str) -> Union[int, str, None]:
         """
         @param key: 查询的目标key
         @return: key的value
             key not exists: None
         """
-        try:
-            value = self.conn.get(key)
-            return WXSuccess, value
-        except redis.exceptions.TimeoutError:
-            return RedisErrorConn, traceback.format_exc()
-        except redis.exceptions.RedisError:
-            return RedisErrorGetkey, traceback.format_exc()
+        return self.Ping if isinstance(self.Ping, int) else self.conn.get(key)
 
     def KeyTTL(self, key: str) -> Tuple[int, Any]:
         """
@@ -75,7 +70,7 @@ class RedisClass:
     def KeyDelete(self):
         pass
 
-    def KeyCreate(self, key: str, value: Any, ttl: Union[int, timedelta] = 7200) -> Tuple[int, Union[Exception, None]]:
+    def KeyCreate(self, key: str, value: Any, ttl: Union[int, timedelta] = 7200) -> Tuple[None, int]:
         """
         @param key: 创建的目标key
         @param value: key的value
@@ -88,8 +83,6 @@ class RedisClass:
                 value=value,
                 ex=ttl
             )
-            return WXSuccess, None
-        except redis.exceptions.TimeoutError:
-            return RedisErrorConn, traceback.format_exc()
+            return None
         except redis.exceptions.RedisError:
-            return RedisErrorSetKey, key + "\n" + traceback.format_exc()
+            return RedisErrorSetKey
