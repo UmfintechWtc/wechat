@@ -38,6 +38,9 @@ WXErrorAccessToken: int = 10010
 # Redis设置key失败
 RedisErrorSetKey: int = 10011
 
+# Redis设置key失败
+RedisGetKey: int = 10012
+
 # Redis获取key ttl失败
 RedisErrorTTLKey: int = 10013
 
@@ -103,17 +106,12 @@ class CustomException(Exception):
         """
         self.code = code
         self.code_description = code_description.get(code, "Unknown Error")
-        self.err = msg
-        super().__init__(self.err)
 
     def __str__(self) -> str:
         """
         Returns: 异常日志
         """
-        if self.err == "":
-            return f"code: {self.code}, description: {self.code_description}"
-        else:
-            return f"code: {self.code}, description: {self.code_description} \n{self.err}"
+        return f"code: {self.code}, description: {self.code_description}"
 
 def ResponseBody(code: int):
     response_data = {

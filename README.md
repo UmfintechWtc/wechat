@@ -64,9 +64,10 @@ curl -X POST \
         "agentid": 1000006,
         "secret": "ztbhARkEN6V4HvzMGQaUd8snA7Mn6BGKxJ3cgHsqt0o",
         "receiver": {"touser": ["TianCiwang", 'JiaoWoChunGu']},
-        "content": "告警：服务器 CPU 使用率过高！",
+        "content": "wwww",
         "msg_type": "text"
       }'
+curl -X POST http://localhost:18889/alarm -H "Content-Type: application/json" -d '{"agentid": 1000006,"secret": "ztbhARkEN6V4HvzMGQaUd8snA7Mn6BGKxJ3cgHsqt0o","receiver": {"touser": ["TianCiwang", "JiaoWoChunGu"]},"content": "wwww","msgtype": "text"}'
 ```
 
 

@@ -102,16 +102,16 @@ def alarm(config: Config) -> Flask:
             "text" if not body.msgtype else body.msgtype
         )
 
-        ret, rsp = alarm.SendAlarmRequest(
+        ret = alarm.SendAlarmRequest(
             body.content if body.content else "Hi, thanks for using qywx alarm",
             body.receiver.touser if body.receiver.touser else "",
-            body.receiver.toparty if body.receiver.toparty else "@all",
-            body.receiver.totag if body.receiver.totag else "@all"
+            # body.receiver.toparty if body.receiver.toparty else "@all",
+            # body.receiver.totag if body.receiver.totag else "@all"
         )
         if ret != WXSuccess:
-            xlogger().error(CustomException(ret, rsp))
-            return jsonify(rsp), 500
+            xlogger().error(CustomException(ret))
+            return jsonify(str(CustomException(ret))), 500
 
-        return jsonify(rsp), 200
+        return jsonify("!11"), 200
 
     return app

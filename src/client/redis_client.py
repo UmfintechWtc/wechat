@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Tuple, Union
 from ierror import *
 from datetime import timedelta
-
+from src.common.log import XLogger as xlogger
 
 class RedisClass:
     _pool = None
@@ -32,17 +32,16 @@ class RedisClass:
         self.conn = redis.Redis(connection_pool=RedisClass._pool, decode_responses=True)
 
     @property
-    def Ping(self) -> Tuple[int, Union[Exception, bool]]:
+    def Ping(self) -> Tuple[int, Union[bool, int]]:
         """
         @return: Redis 状态检测结果
             True is ok
         """
         try:
-            value = self.conn.ping()
-            return value
-        except redis.exceptions.TimeoutError:
-            return RedisErrorConn
+            return self.conn.ping()
         except redis.exceptions.RedisError:
+            # xlogger().error(str(CustomException(RedisErrorPing)))
+            xlogger().error(traceback.format_exc())
             return RedisErrorPing
 
     def KeySelect(self, key: str) -> Union[int, str, None]:
@@ -51,7 +50,13 @@ class RedisClass:
         @return: key的value
             key not exists: None
         """
-        return self.Ping if isinstance(self.Ping, int) else self.conn.get(key)
+        ret = self.Ping
+        if isinstance(ret, int):
+            return ret
+        elif isinstance(ret, bool) and ret:
+            return self.conn.get(key)
+        else:
+            return RedisErrorConn
 
     def KeyTTL(self, key: str) -> Tuple[int, Any]:
         """

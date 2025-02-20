@@ -25,20 +25,16 @@ class AlarmClass(BaseClass, RedisClass):
         @return: access_token
         """
         ret = super().KeySelect(self.redis_access_token_key)
-        if isinstance(ret, int):
-            return ret
-        elif isinstance(ret, bytes):
-            return ret.decode("utf8")
-        elif isinstance(ret, str):
-            return ret
-        elif not ret:
+        if not ret:
             """
             redis 未获取到 access_token
             """
-            ret = super().CreateAccessToken()
+            ctk = super().CreateAccessToken()
             if isinstance(ret, int):
                 return ret
             return super().KeyCreate(self.redis_access_token_key, ret)         
+        else:
+            return ret
             
 
     def SendRequestBody(self, url: str, body: Dict[str, Union[str, int, Dict[str, str]]], timeout: int) -> Dict[str, Union[int, str]]:
@@ -53,10 +49,10 @@ class AlarmClass(BaseClass, RedisClass):
     def SendAlarmRequest(self,
         content: str,
         touser: Union[str, List[str]],
-        toparty: Union[str, List[str]],
-        totag: Union[str, List[str]],
+        # toparty: Union[str, List[str]],
+        # totag: Union[str, List[str]],
         timeout: int = 30,
-    ) -> Tuple[int, Union[Exception, str]]:
+    ) -> int:
         """
         @param content: 发送内容
         @param touser: 指定用户接收
@@ -70,8 +66,8 @@ class AlarmClass(BaseClass, RedisClass):
             "msgtype": self.msgtype,
             "safe": self.safe,
             "touser": f"{super().CheckSpecialReceiver(touser)}",
-            "toparty": f"{super().CheckSpecialReceiver(toparty)}",
-            "totag": f"{super().CheckSpecialReceiver(totag)}",
+            # "toparty": f"{super().CheckSpecialReceiver(toparty)}",
+            # "totag": f"{super().CheckSpecialReceiver(totag)}",
             f"{self.msgtype}": {
                 "content": content
             },
@@ -82,36 +78,37 @@ class AlarmClass(BaseClass, RedisClass):
         # 发送消息
         try:
             response = self.SendRequestBody(
-                super().SendMessageApi(at),
+                super().SendMessageApi(ret),
                 request_body,
                 timeout
             )
         except Exception:
-            return AlarmErrorSend, str(request_body) + "\n" + traceback.format_exc()
+            return AlarmErrorSend
 
         # access_token 已过期、无权限，重新创建access_token并重试发送消息
         if response.get("errcode") in self.retry_code:
-            ret, at = super().CreateAccessToken()
-            if ret != WXSuccess:
-                return ret, at
-            ret, err = super().KeyCreate(self.redis_access_token_key, at)
-            if ret != WXSuccess:
-                return ret, err
-            ret, at = super().KeySelect(self.redis_access_token_key)
-            if ret != WXSuccess:
-                return ret, at
-            if isinstance(at, bytes):
-                at = at.decode("utf8")
-            elif isinstance(at, str):
-                at = at
+            ret= super().CreateAccessToken()
+            if isinstance(ret, str):
+                crk = super().KeyCreate(self.redis_access_token_key, ret)
+                if isinstance(crk, int):
+                    return ret
+
+            atk = super().KeySelect(self.redis_access_token_key)
+            if isinstance(atk, int):
+                return atk
+            elif isinstance(atk, None):
+                return RedisGetKey
+            elif isinstance(atk, str):
+                atk = atk.decode("utf8")
+            print (atk,'!11111111111111111111111111111111111')
             try:
-                response = self.SendRequestBody(super().SendMessageApi(at), request_body, timeout)
+                response = self.SendRequestBody(super().SendMessageApi(atk), request_body, timeout)
             except Exception:
-                return AlarmErrorSend, str(request_body) + "\n" + traceback.format_exc()
+                return AlarmErrorSend
             if response.get("errcode") != 0:
-                return AlarmErrorSend, response
-            return WXSuccess, response
+                return AlarmErrorSend
+            return WXSuccess
         else:
             if response.get("errcode") != 0:
-                return AlarmErrorSend, response
-            return WXSuccess, response
+                return AlarmErrorSend
+            return WXSuccess
