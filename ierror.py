@@ -35,19 +35,16 @@ WXErrorEncodeReplyMsg: int = 10009
 # 获取企业微信应用AccessToken异常
 WXErrorAccessToken: int = 10010
 
-# Redis设置key失败
+# redis set key err
 RedisErrorSetKey: int = 10011
 
-# Redis设置key失败
-RedisGetKey: int = 10012
+# redis key is None
+RedisKeyIsNone: int = 10012
 
-# Redis获取key ttl失败
+# redis get key ttl err
 RedisErrorTTLKey: int = 10013
 
-# Redis探测失败
-RedisErrorPing: int = 10014
-
-# Redis 连接超时
+# redis ping error
 RedisErrorConn: int = 10015
 
 # Alarm 未提供 agentid
@@ -86,8 +83,7 @@ code_description = {
     10011: "Redis 设置 key 异常",
     10012: "Redis 获取 key 的 value 异常",
     10013: "Redis 获取 key 的 ttl 异常",
-    10014: "Redis 连接异常",
-    10015: "Redis 连接超时",
+    10015: "Redis 连接异常",
     10016: "未提供企业微信 agentid",
     10017: "未提供企业微信 secret",
     10018: "未提供企业企业微信接收人",
@@ -98,14 +94,14 @@ code_description = {
 }
 
 class CustomException(Exception):
-    def __init__(self, code: int, msg: Union[str, Exception] = ""):
+    def __init__(self, code: int):
         """
         Args:
             code: 异常码
             msg: 异常信息
         """
         self.code = code
-        self.code_description = code_description.get(code, "Unknown Error")
+        self.code_description = code_description.get(int(code), "Unknown Error")
 
     def __str__(self) -> str:
         """

@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Tuple, Union
 from ierror import *
 from datetime import timedelta
-from src.common.log import XLogger as xlogger
+from src.common.log import log_method
 
 class RedisClass:
     _pool = None
@@ -30,39 +30,31 @@ class RedisClass:
                 max_connections=max_connections
             )
         self.conn = redis.Redis(connection_pool=RedisClass._pool, decode_responses=True)
+        self.ping = self.Ping
 
     @property
-    def Ping(self) -> Tuple[int, Union[bool, int]]:
+    @log_method
+    def Ping(self) -> bool:
         """
-        @return: Redis 状态检测结果
-            True is ok
+        @return: redis conn status. True or False
         """
-        try:
-            return self.conn.ping()
-        except redis.exceptions.RedisError:
-            # xlogger().error(str(CustomException(RedisErrorPing)))
-            xlogger().error(traceback.format_exc())
-            return RedisErrorPing
-
-    def KeySelect(self, key: str) -> Union[int, str, None]:
+        return self.conn.ping()
+    
+    @log_method
+    def KeySelect(self, key: str) -> Union[str, int]:
         """
-        @param key: 查询的目标key
-        @return: key的value
-            key not exists: None
+        @param key: redis key.
+        @return: key's value. 
         """
-        ret = self.Ping
-        if isinstance(ret, int):
-            return ret
-        elif isinstance(ret, bool) and ret:
-            return self.conn.get(key)
-        else:
+        if not self.ping:
             return RedisErrorConn
-
+        value = self.conn.get(key)
+        return value.decode("utf8") if value else RedisKeyIsNone
+                        
     def KeyTTL(self, key: str) -> Tuple[int, Any]:
         """
-        @param key: 查询的目标key
-        @return: key的存活时长
-            key not exists: -2
+        @param key: select target key ttl
+        @return: ttl
         """
         try:
             value = self.conn.ttl(key)
@@ -72,10 +64,7 @@ class RedisClass:
         except redis.exceptions.RedisError:
             return RedisErrorTTLKey, traceback.format_exc()
 
-    def KeyDelete(self):
-        pass
-
-    def KeyCreate(self, key: str, value: Any, ttl: Union[int, timedelta] = 7200) -> Tuple[None, int]:
+    def KeyCreate(self, key: str, value: Any, ttl: Union[int, timedelta] = 7200) -> int:
         """
         @param key: 创建的目标key
         @param value: key的value
@@ -88,6 +77,6 @@ class RedisClass:
                 value=value,
                 ex=ttl
             )
-            return None
+            return WXSuccess
         except redis.exceptions.RedisError:
             return RedisErrorSetKey

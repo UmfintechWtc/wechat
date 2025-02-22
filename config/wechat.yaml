@@ -11,5 +11,5 @@ qywx:
 # 存储企业微信 access_token
 redis:
   host: 127.0.0.1
-  port: 6378
+  port: 6379
   password: Umfintech_0PS

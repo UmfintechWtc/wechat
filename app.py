@@ -4,7 +4,7 @@ from src.handle.reply_handle import NewReplyMsgWithQYWXHandle
 from src.handle.response_handle import NewResponseToQYWXHandle
 from src.handle.verify_handle import NewVerifyQywxHandle
 from src.pkg.alarm import AlarmClass
-from src.common.log import XLogger as xlogger
+from src.common.log import XLogger
 from src.config.wechat_config import Config
 
 
@@ -38,15 +38,15 @@ def openapi(config: Config) -> Flask:
         if request.method == "GET":
             ret, xml_content, err = NewVerifyQywxHandle(args)
             if ret != WXSuccess:
-                xlogger().fatal(CustomException(ret, err))
-            xlogger().info(CustomException(WXSuccess))
+                XLogger().fatal(CustomException(ret, err))
+            XLogger().info(CustomException(WXSuccess))
             return xml_content
 
         if request.method == "POST":
             args["request_data"] = request.data
             ret, content, err = NewReplyMsgWithQYWXHandle(args)
             if ret != WXSuccess:
-                xlogger().fatal(CustomException(ret, err))
+                XLogger().fatal(CustomException(ret, err))
             if content:
                 if content == "tianciwang":
                     replyMsg = "tianciwang"
@@ -56,7 +56,7 @@ def openapi(config: Config) -> Flask:
                 args["response"] = msg
                 ret, response, err = NewResponseToQYWXHandle(args)
                 if ret != WXSuccess:
-                    xlogger().fatal(CustomException(ret, err))
+                    XLogger().fatal(CustomException(ret, err))
                 else:
                     return response
             else:
@@ -90,10 +90,10 @@ def alarm(config: Config) -> Flask:
             _response = jsonify(ResponseBody(AlarmErrorMsgType))
 
         if _response:
-            xlogger().error(f"{request.remote_addr} - {request.method} - {request.json} - {_response.json}")
+            XLogger().error(f"{request.remote_addr} - {request.method} - {request.json} - {_response.json}")
             return _response, 400
 
-        xlogger().info(f"{request.remote_addr} - {request.method} - {request.json}")
+        XLogger().info(f"{request.remote_addr} - {request.method} - {request.json}")
         alarm = AlarmClass(
             dict(config.redis.map_),
             body.agentid,
@@ -102,16 +102,14 @@ def alarm(config: Config) -> Flask:
             "text" if not body.msgtype else body.msgtype
         )
 
-        ret = alarm.SendAlarmRequest(
+        rsp = alarm.SendAlarmRequest(
             body.content if body.content else "Hi, thanks for using qywx alarm",
             body.receiver.touser if body.receiver.touser else "",
             # body.receiver.toparty if body.receiver.toparty else "@all",
             # body.receiver.totag if body.receiver.totag else "@all"
         )
-        if ret != WXSuccess:
-            xlogger().error(CustomException(ret))
-            return jsonify(str(CustomException(ret))), 500
-
-        return jsonify("!11"), 200
+        if isinstance(rsp, int):
+            return jsonify(str(CustomException(rsp))), 500
+        return jsonify(rsp), 200
 
     return app

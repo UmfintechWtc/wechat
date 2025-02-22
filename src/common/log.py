@@ -2,8 +2,8 @@ import logging
 import sys
 import os
 import time
+from functools import wraps
 from colorlog import ColoredFormatter
-
 from src.common.const import *
 from src.common.utility import CreateDirectory
 
@@ -13,7 +13,7 @@ logName = f"{os.path.dirname(os.path.abspath(__file__))}/logs/{APP_NAME}-{str(ti
 class XLogger:
     _instance = None
 
-    def __new__(cls, output: str = "stdout"):
+    def __new__(cls, output: str = "stdout" ):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.logger = cls._instance.setup_logger(output)
@@ -29,7 +29,7 @@ class XLogger:
         if output == "stdout":
             # Create a colored formatter for console output
             console_formatter = ColoredFormatter(
-                "%(log_color)s%(asctime)s | %(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s")
+                "%(log_color)s%(asctime)s | %(levelname)-5s%(reset)s | %(log_color)s%(message)s%(reset)s")
             # support stdout
             console_handler = logging.StreamHandler(sys.stdout)
             console_handler.setFormatter(console_formatter)
@@ -66,3 +66,17 @@ class XLogger:
     def fatal(self, msg):
         self.logger.fatal(msg)
         exit(1)
+
+def log_method(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        logger = XLogger()
+        logger.info(f"Calling  [{func.__name__}] with args: {args}, kwargs: {kwargs}")
+        try:
+            result = func(self, *args, **kwargs)
+            # 记录方法返回日志
+            logger.info(f"Function [{func.__name__}] returned: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"Function [{func.__name__}] raised an exception: {str(e)}")
+    return wrapper

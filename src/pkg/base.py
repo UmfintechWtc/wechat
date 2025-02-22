@@ -21,7 +21,7 @@ class BaseClass:
         self.id = id
         self.special_receiver = "@all"
 
-    def CreateAccessToken(self, timeout: int = 30) -> Union[str, Exception]:
+    def GetAccessToken(self, timeout: int = 30) -> Union[str, int]:
         """
         @return: access_token
         """

@@ -1,4 +1,4 @@
-from src.common.log_debug import log_method
+from src.common.log import log_method
 
 
 
@@ -22,4 +22,4 @@ obj = MyClass("Alice")
 obj.say_hello("Hi")
 
 # 文件输出日志
-obj.divide(10, 2)
+obj.divide(10)
