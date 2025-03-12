@@ -1,6 +1,6 @@
 import requests
 from typing import Tuple, Union, Dict, List
-import traceback
+from src.common.const import QYWX_APPLICATION_ACCESS_TOKEN
 from ierror import *
 
 class BaseClass:
@@ -11,11 +11,9 @@ class BaseClass:
         @param secret: 企业微信应用 secret
         @param cropid: 企业微信 cropid
         @param msgtype: 消息类型
-        @param safe: 消息是否加密
         """
         self.url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={cropid}&corpsecret={secret}"
-        self.send_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token="
-        self.redis_access_token_key = "qywx_app_access_token"
+        self.redis_access_token_key = QYWX_APPLICATION_ACCESS_TOKEN
         self.msgtype = msgtype
         self.id = id
         self.special_receiver = "@all"
@@ -46,11 +44,3 @@ class BaseClass:
             return  self.special_receiver
         else:
             return "|".join(map(lambda x: str(x), receiver))
-
-    def SendMessageApi(self, at: str) -> str:
-        """
-        @param at: access_token
-        @return: 企业微信发送消息API接口
-        """
-        url = self.send_url + at
-        return url

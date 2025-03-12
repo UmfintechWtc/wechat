@@ -1,6 +1,7 @@
 # customer
 venv3
 config/debug.yaml
+debug/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

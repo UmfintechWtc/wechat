@@ -86,8 +86,8 @@ def alarm(config: Config) -> Flask:
         if not body.receiver.touser:
             _response = jsonify(ResponseBody(AlarmErrorToAim))
 
-        if body.msgtype and body.msgtype not in ["text", "markdown"]:
-            _response = jsonify(ResponseBody(AlarmErrorMsgType))
+        if body.msgtype and body.msgtype not in ["text", "markdown", "template_card"]:
+            _response = jsonify(ResponseBody(InvaildMsgType))
 
         if _response:
             XLogger().error(f"{request.remote_addr} - {request.method} - {request.json} - {_response.json}")
@@ -101,7 +101,6 @@ def alarm(config: Config) -> Flask:
             config.qywx.cropid,
             "text" if not body.msgtype else body.msgtype
         )
-
         rsp = alarm.SendAlarmRequest(
             body.content if body.content else "Hi, thanks for using qywx alarm",
             body.receiver.touser if body.receiver.touser else "",

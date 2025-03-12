@@ -53,7 +53,7 @@ class AlarmClass(BaseClass, RedisClass):
 
     @log_method
     def SendAlarmRequest(self,
-        content: str,
+        content: Any,
         touser: Union[str, List[str]],
         toparty: Union[str, List[str]],
         totag: Union[str, List[str]],
@@ -67,24 +67,26 @@ class AlarmClass(BaseClass, RedisClass):
         @param timeout: 等待服务端响应时间
         @return: 请求body
         """
+        tk = self.GetValidAccessToken
+        if isinstance(tk, int):
+            return tk
+
         rbc = RequestBody(
             self.id, 
             super().CheckSpecialReceiver(touser), 
             super().CheckSpecialReceiver(toparty), 
             super().CheckSpecialReceiver(totag), 
+            tk,
         )
         if self.msgtype == "text":
-            request_body = rbc.Text(content)
+            request_body, url = rbc.Text(content)
         elif self.msgtype == "markdown":
-            request_body = rbc.Markdown(content)
-        else:
-            return InvaildMsgType
+            request_body, url = rbc.Markdown(content)
+        elif self.msgtype == "template_card":
+            request_body, url = rbc.TemplateCard(content.map_)
         
-        tk = self.GetValidAccessToken
-        if isinstance(tk, int):
-            return tk
         response = self.SendRequestBody(
-            super().SendMessageApi(tk),
+            url,
             request_body,
             timeout
         )

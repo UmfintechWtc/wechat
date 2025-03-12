@@ -62,14 +62,9 @@ AlarmErrorToAim: int = 10019
 # Alarm touser、toparty、totag 类型错误
 AlarmErrorReceiverType: int = 10020
 
-# Alarm msgtype 不符合要求
-AlarmErrorMsgType: int = 10021
+# 不支持的消息格式类型
+InvaildMsgType: int = 10021
 
-# Alarm Send失败
-AlarmErrorSend: int = 10021
-
-# 不支持的消息类型
-InvaildMsgType: int = 10022
 
 code_description = {
     0: "正常响应",
@@ -92,9 +87,7 @@ code_description = {
     10018: "未提供企业企业微信接收人",
     10019: "touser 不能为空",
     10020: "多个 touser 以英文逗号分割",
-    10021: "msgtype类型为 text",
-    10021: "调用企业微信应用发送消息失败",
-    10022: "不支持的消息类型, msgtype 可选 text | markdown"
+    10021: "不支持的消息类型, msgtype 可选 text | markdown | template_card",
 }
 
 class CustomException(Exception):
