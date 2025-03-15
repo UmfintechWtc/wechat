@@ -81,6 +81,7 @@ def NewReplyMsgWithQYWXHandle(data: Dict[str, str]) -> Tuple[int, Union[str, Non
     @return: 企业微信回复的内容
         Tuple[int, str|None, Exception|None]
     """
+    td = dict()
     rmqh = ReplyMsgWithQYWXHandle(**data)
     ret, body, err = rmqh.VerifySignature
     if ret != WXSuccess:
@@ -89,8 +90,10 @@ def NewReplyMsgWithQYWXHandle(data: Dict[str, str]) -> Tuple[int, Union[str, Non
     if ret != WXSuccess:
         return ret, None, err
     xml_tree = ET.fromstring(xml_content)
-    if "Content" in xml_content.decode("utf8"):
-        content = xml_tree.find("Content").text
-        return ret, content, None
-    else:
-        return ret, None, None
+    td = {child.tag: child.text for child in xml_tree}
+    # if "Content" in xml_content.decode("utf8"):
+    #     content = xml_tree.find("Content").text
+    #     return ret, content, None
+    return 0, td['ResponseCode'], None
+    # else:
+    #     return ret, None, None

@@ -45,22 +45,16 @@ def openapi(config: Config) -> Flask:
         if request.method == "POST":
             args["request_data"] = request.data
             ret, content, err = NewReplyMsgWithQYWXHandle(args)
-            if ret != WXSuccess:
-                XLogger().fatal(CustomException(ret, err))
-            if content:
-                if content == "tianciwang":
-                    replyMsg = "tianciwang"
-                    msg = Msg(replyMsg)
-                else:
-                    msg = Msg(f"Unknown operation type:  {content}")
-                args["response"] = msg
-                ret, response, err = NewResponseToQYWXHandle(args)
-                if ret != WXSuccess:
-                    XLogger().fatal(CustomException(ret, err))
-                else:
-                    return response
-            else:
-                return "200"
+            print (content, "222222222222222222222")
+            alarm = AlarmClass(
+                dict(config.redis.map_),
+                1000006,
+                "ztbhARkEN6V4HvzMGQaUd8snA7Mn6BGKxJ3cgHsqt0o",
+                "wwc4cb679fd7911d16",
+                "text"
+            )
+            response = alarm.SendAlarmRequest(content)
+            return response
 
     return app
 
@@ -74,6 +68,7 @@ def alarm(config: Config) -> Flask:
         _response = None
         from src.common.utility import Dict2Obj
         body = Dict2Obj(request.json)
+        print (body.map_)
         if not body.agentid:
             _response = jsonify(ResponseBody(AlarmErrorAgentId))
 

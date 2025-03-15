@@ -22,6 +22,7 @@ class BaseClass:
         """
         @return: access_token
         """
+        print ("get access token", url)
         try:
             response = requests.get(
                 self.url,

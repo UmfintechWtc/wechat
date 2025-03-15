@@ -53,11 +53,7 @@ class AlarmClass(BaseClass, RedisClass):
 
     @log_method
     def SendAlarmRequest(self,
-        content: Any,
-        touser: Union[str, List[str]],
-        toparty: Union[str, List[str]],
-        totag: Union[str, List[str]],
-        timeout: int = 30,
+        response_code: Any,
     ) -> Union[int, Dict[str, Any]]:
         """
         @param content: 发送内容
@@ -67,35 +63,24 @@ class AlarmClass(BaseClass, RedisClass):
         @param timeout: 等待服务端响应时间
         @return: 请求body
         """
+        
         tk = self.GetValidAccessToken
         if isinstance(tk, int):
             return tk
-
         rbc = RequestBody(
-            self.id, 
-            super().CheckSpecialReceiver(touser), 
-            super().CheckSpecialReceiver(toparty), 
-            super().CheckSpecialReceiver(totag), 
+            100006, 
+            ['TianCiwang'], 
+            "", 
+            "", 
             tk,
         )
-        if self.msgtype == "text":
-            request_body, url = rbc.Text(content)
-        elif self.msgtype == "markdown":
-            request_body, url = rbc.Markdown(content)
-        elif self.msgtype == "template_card":
-            request_body, url = rbc.TemplateCard(content.map_)
-        
+        print (rbc.agentid)
+        request_body, url = rbc.UpdateCard(response_code)
+        print (request_body)
+        print (url)
         response = self.SendRequestBody(
             url,
             request_body,
-            timeout
+            30
         )
-        if response.get("errcode") in self.retry_code:
-            actk = super().GetAccessToken()
-            if isinstance(actk, int):
-                return actk
-            rctkk = super().KeyCreate(self.redis_access_token_key, actk)
-            if rctkk != WXSuccess:
-                return rctkk
-            response = self.SendRequestBody(super().SendMessageApi(actk), request_body, timeout)
         return response

@@ -8,7 +8,9 @@ class RequestBody:
         self.tag= totag
         self.tk = access_token
         self.base_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token="
+        self.template_base_url = "https://qyapi.weixin.qq.com/cgi-bin/message/update_template_card?access_token="
         self.send_url = self.base_url + self.tk
+        self.tempalte_update_url = self.template_base_url + self.tk
 
     def Text(self, content):
         request_body = {
@@ -47,3 +49,15 @@ class RequestBody:
             "template_card": content
         }
         return request_body, self.send_url
+    
+    def UpdateCard(self, response_code):
+        request_body = {
+            "userids" : ["TianCiwang"],
+            "atall" : 0,
+            "agentid" : 1000006,
+            "response_code": response_code,
+            "button":{
+                "replace_name": "woosa已忽略"
+            }
+        }
+        return request_body, self.tempalte_update_url
